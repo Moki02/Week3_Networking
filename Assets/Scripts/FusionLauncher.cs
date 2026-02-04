@@ -19,8 +19,10 @@ namespace Com.MyCompany.MyGame
         [SerializeField] private GameObject controlPanel;
         [SerializeField] private GameObject progressLabel;
 
-        [Header("Game Settings")]
+        [Header("Spawn Settings")]
         [SerializeField] private NetworkPrefabRef playerPrefab;
+        [SerializeField] private Transform team1SpawnPoint;
+        [SerializeField] private Transform team2SpawnPoint;
 
         private NetworkRunner _runner;
 
@@ -28,6 +30,25 @@ namespace Com.MyCompany.MyGame
         {
             // Prevents the Runner from being destroyed when the game scene loads
             DontDestroyOnLoad(this.gameObject);
+
+            // Robustness: Create spawn points if they are missing
+            if (team1SpawnPoint == null)
+            {
+                GameObject t1 = new GameObject("Team1_SpawnPoint");
+                t1.transform.position = new Vector3(-5, 1, 0);
+                // Parent to this object so it persists with DontDestroyOnLoad
+                t1.transform.SetParent(transform);
+                team1SpawnPoint = t1.transform;
+            }
+
+            if (team2SpawnPoint == null)
+            {
+                GameObject t2 = new GameObject("Team2_SpawnPoint");
+                t2.transform.position = new Vector3(5, 1, 0);
+                // Parent to this object so it persists with DontDestroyOnLoad
+                t2.transform.SetParent(transform);
+                team2SpawnPoint = t2.transform;
+            }
         }
 
         private void Start()
@@ -35,6 +56,10 @@ namespace Com.MyCompany.MyGame
             startButton.onClick.AddListener(StartGame);
             controlPanel.SetActive(true);
             progressLabel.SetActive(false);
+
+            // Initialize Team Selection
+            colorDropdown.ClearOptions();
+            colorDropdown.AddOptions(new List<string> { "Team 1", "Team 2" });
         }
 
         async void StartGame()
@@ -83,9 +108,10 @@ namespace Com.MyCompany.MyGame
             // Only the Server/Host should spawn the player
             if (runner.IsServer)
             {
-                Vector3 spawnPosition = new Vector3(UnityEngine.Random.Range(-5, 5), 1, UnityEngine.Random.Range(-5, 5));
+                // Spawn at a neutral waiting area initially, until they select a team via RPC
+                Vector3 spawnPosition = new Vector3(0, 100, 0); 
                 runner.Spawn(playerPrefab, spawnPosition, Quaternion.identity, player);
-                Debug.Log($"Spawned player for: {player}");
+                Debug.Log($"Spawned player object for: {player}. Waiting for team selection.");
             }
         }
 
@@ -134,6 +160,15 @@ namespace Com.MyCompany.MyGame
         #endregion
 
         public string GetLocalPlayerName() => nameInputField.text;
-        public int GetLocalPlayerColorIndex() => colorDropdown.value;
+        public int GetLocalPlayerTeamIndex() => colorDropdown.value;
+
+        public Vector3 GetSpawnPosition(int teamIndex)
+        {
+            Vector3 pos;
+            if (teamIndex == 0) pos = team1SpawnPoint.position;
+            else pos = team2SpawnPoint.position;
+
+            return new Vector3(pos.x, 1, pos.z);
+        }
     }
 }

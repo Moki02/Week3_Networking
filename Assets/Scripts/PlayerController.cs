@@ -13,15 +13,8 @@ namespace Com.MyCompany.MyGame
         [Header("Movement Settings")]
         [SerializeField] private float moveSpeed = 5f;
 
-        [Header("Visuals")]
-        [SerializeField]
-        private Color[] availableColors = {
-            Color.red, Color.blue, Color.green, Color.yellow,
-            Color.cyan, Color.magenta, Color.white, Color.black
-        };
-
         [Networked] public NetworkString<_16> PlayerName { get; set; }
-        [Networked] public int PlayerColorIndex { get; set; }
+        [Networked] public int PlayerTeamIndex { get; set; }
 
         private TMP_Text _nameTagText;
         private ChangeDetector _changes;
@@ -39,7 +32,7 @@ namespace Com.MyCompany.MyGame
                 var launcher = FindFirstObjectByType<FusionLauncher>();
                 if (launcher != null)
                 {
-                    RPC_SetDetails(launcher.GetLocalPlayerName(), launcher.GetLocalPlayerColorIndex());
+                    RPC_SetDetails(launcher.GetLocalPlayerName(), launcher.GetLocalPlayerTeamIndex());
                 }
             }
 
@@ -64,7 +57,7 @@ namespace Com.MyCompany.MyGame
                 switch (change)
                 {
                     case nameof(PlayerName):
-                    case nameof(PlayerColorIndex):
+                    case nameof(PlayerTeamIndex):
                         UpdateVisuals();
                         break;
                 }
@@ -72,10 +65,19 @@ namespace Com.MyCompany.MyGame
         }
 
         [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-        public void RPC_SetDetails(string name, int colorIndex)
+        public void RPC_SetDetails(string name, int teamIndex)
         {
             PlayerName = name;
-            PlayerColorIndex = colorIndex;
+            PlayerTeamIndex = teamIndex;
+            
+            // Teleport to team spawn point
+            var launcher = FindFirstObjectByType<FusionLauncher>();
+            if (launcher != null)
+            {
+                Vector3 spawnPos = launcher.GetSpawnPosition(teamIndex);
+                transform.position = spawnPos;
+                Debug.Log($"Moved player {name} to Team {teamIndex + 1} spawn at {spawnPos}");
+            }
         }
 
         private void CreateNameTag()
@@ -94,9 +96,11 @@ namespace Com.MyCompany.MyGame
         {
             if (_nameTagText != null) _nameTagText.text = PlayerName.ToString();
 
-            if (playerRenderer != null && PlayerColorIndex >= 0 && PlayerColorIndex < availableColors.Length)
+            if (playerRenderer != null)
             {
-                playerRenderer.material.color = availableColors[PlayerColorIndex];
+                // Team 0 = Red, Team 1 = Blue
+                Color teamColor = (PlayerTeamIndex == 0) ? Color.red : Color.blue;
+                playerRenderer.material.color = teamColor;
             }
         }
     }
