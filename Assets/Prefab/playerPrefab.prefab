@@ -152,6 +152,7 @@ GameObject:
   - component: {fileID: 2980955757522920117}
   - component: {fileID: -976101822407904198}
   - component: {fileID: -6263819383388816654}
+  - component: {fileID: 1260572342678210035}
   m_Layer: 0
   m_Name: playerPrefab
   m_TagString: Player
@@ -267,22 +268,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Com.MyCompany.MyGame.PlayerController
   playerRenderer: {fileID: 8088214352650280324}
-  fpsCamera: {fileID: 816599556978328859}
+  playerCamera: {fileID: 0}
   moveSpeed: 10
-  availableColors:
-  - {r: 1, g: 0, b: 0, a: 1}
-  - {r: 0, g: 0, b: 1, a: 1}
-  - {r: 0, g: 1, b: 0, a: 1}
-  - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  - {r: 0, g: 1, b: 1, a: 1}
-  - {r: 1, g: 0, b: 1, a: 1}
-  - {r: 1, g: 1, b: 1, a: 1}
-  - {r: 0, g: 0, b: 0, a: 1}
+  jumpForce: 5
+  gravity: 20
+  crouchHeight: 1
+  normalHeight: 2
+  crouchSpeed: 3
   _PlayerName:
     _length: 0
     _data:
       Data: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-  _PlayerColorIndex: 0
+  _PlayerTeamIndex: 0
 --- !u!114 &-976101822407904198
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -320,3 +317,28 @@ MonoBehaviour:
   SyncParent: 0
   _autoAOIOverride: 1
   DisableSharedModeInterpolation: 0
+--- !u!143 &1260572342678210035
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7852225369992677742}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 1, z: 2}

@@ -115,20 +115,33 @@ namespace Com.MyCompany.MyGame
             }
         }
 
+        private float _rotationY;
+
         public void OnInput(NetworkRunner runner, NetworkInput input)
         {
             var data = new NetworkInputData();
-            Vector2 moveDir = Vector2.zero;
-
+            
+            // Input accumulation
             if (Keyboard.current != null)
             {
+                Vector2 moveDir = Vector2.zero;
                 if (Keyboard.current.wKey.isPressed) moveDir.y += 1;
                 if (Keyboard.current.sKey.isPressed) moveDir.y -= 1;
                 if (Keyboard.current.aKey.isPressed) moveDir.x -= 1;
                 if (Keyboard.current.dKey.isPressed) moveDir.x += 1;
+                data.direction = moveDir.normalized;
+
+                data.buttons.Set(InputButtons.Jump, Keyboard.current.spaceKey.isPressed);
+                data.buttons.Set(InputButtons.Crouch, Keyboard.current.cKey.isPressed || Keyboard.current.ctrlKey.isPressed);
             }
 
-            data.direction = moveDir;
+            // Mouse rotation
+            if (Mouse.current != null)
+            {
+                _rotationY += Mouse.current.delta.x.ReadValue() * 0.1f; // Sensitivity
+                data.rotationY = _rotationY;
+            }
+
             input.Set(data);
         }
 
